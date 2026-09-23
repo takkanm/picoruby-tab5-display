@@ -1,0 +1,12 @@
+dependencies:
+  # The official M5Stack Tab5 BSP.
+  #
+  # It brings up the I2C bus, releases the LCD and touch resets through the
+  # GPIO expanders, powers the MIPI-DSI PHY, detects the panel generation at
+  # runtime and initialises the panel. Drivers for both the ILI9881C
+  # generation and the ST7123/ST7121 generations come along as dependencies.
+  #
+  # LVGL (esp_lvgl_port) and the camera stack (esp_video) are pulled in too,
+  # but are dropped at link time when nothing calls them. This component does
+  # not use LVGL.
+  espressif/m5stack_tab5: "^1.3"
