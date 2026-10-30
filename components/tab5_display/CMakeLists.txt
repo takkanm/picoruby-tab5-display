@@ -19,6 +19,9 @@ idf_component_register(
     # for the same reasons.
     "tab5_imu.c"
     "../../mrbgems/picoruby-tab5-imu/ports/esp32/imu.c"
+    # The touch panel, likewise.
+    "tab5_touch.c"
+    "../../mrbgems/picoruby-tab5-touch/ports/esp32/touch.c"
   INCLUDE_DIRS "include"
   PRIV_REQUIRES esp_lcd esp_mm
 )

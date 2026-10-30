@@ -1,6 +1,7 @@
 # picoruby-tab5-display
 
-Drive the M5Stack Tab5 display from PicoRuby, and read its accelerometer.
+Drive the M5Stack Tab5 display from PicoRuby, and read its accelerometer and
+touch panel.
 
 ```ruby
 require "display"
@@ -12,19 +13,23 @@ Display.rotation = 90                     # landscape from now on
 
 require "imu"
 IMU.acceleration                          #=> [x, y, z] in g
+
+require "touch"
+Touch.point                               #=> [x, y] or nil
 ```
 
 The panel is portrait: **720 x 1280, RGB565**.
 
 ## What is in here
 
-Three things that have to travel together:
+Four things that have to travel together:
 
 | | |
 | --- | --- |
 | `mrbgems/picoruby-tab5-display/` | The mrbgem for the `Display` class and its VM binding |
 | `mrbgems/picoruby-tab5-imu/` | The mrbgem for the `IMU` class (the BMI270 accelerometer) |
-| `components/tab5_display/` | The ESP-IDF component that talks to the panel and the accelerometer |
+| `mrbgems/picoruby-tab5-touch/` | The mrbgem for the `Touch` class (the touch panel) |
+| `components/tab5_display/` | The ESP-IDF component that talks to the panel, the accelerometer and the touch panel |
 
 Each gem is optional. Leave out the `conf.gem` line of one you do not need.
 
@@ -68,6 +73,8 @@ conf.gem File.expand_path(
   '../../../external/picoruby-tab5-display/mrbgems/picoruby-tab5-display', __dir__)
 conf.gem File.expand_path(
   '../../../external/picoruby-tab5-display/mrbgems/picoruby-tab5-imu', __dir__)
+conf.gem File.expand_path(
+  '../../../external/picoruby-tab5-display/mrbgems/picoruby-tab5-touch', __dir__)
 ```
 
 > **Floats on the ESP32-P4.** If the build config is FemtoRuby's
@@ -170,6 +177,22 @@ drifts.
 > and the next read sometimes fails with `ESP_ERR_INVALID_STATE`. The
 > component retries the initialisation, so a warning like
 > `BMI270 init failed ... retrying` on boot is expected.
+
+### Touch
+
+| | |
+| --- | --- |
+| `Touch.point` | `[x, y]` of the first touch point, or `nil` when nothing touches the panel |
+
+The coordinates are physical panel coordinates (0..719, 0..1279) and do not
+follow `Display.rotation`. The panel is set up on the first call through
+the BSP's `bsp_touch_new()`, which picks the controller for the board
+generation (GT911, or ST7123 for the ST7123 / ST7121 panels).
+
+`Touch.point` reads the panel once and does no debouncing. To react to a
+tap, poll it and act on the transition from touching to not touching;
+acting on the touch itself fires repeatedly while a finger rests on the
+panel.
 
 ### Notes
 

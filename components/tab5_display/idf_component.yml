@@ -10,3 +10,8 @@ dependencies:
   # but are dropped at link time when nothing calls them. This component does
   # not use LVGL.
   espressif/m5stack_tab5: "^1.3"
+
+  # The touch panel API (esp_lcd_touch_read_data and friends). The BSP pulls
+  # it in for its own touch drivers but does not re-export it, so name it
+  # here. Pinned to the major version the BSP's drivers resolve to.
+  espressif/esp_lcd_touch: "^1.2"
