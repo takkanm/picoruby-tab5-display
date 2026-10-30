@@ -24,13 +24,25 @@ ok(const char *what, esp_err_t err)
 int
 Display_width(void)
 {
-  return TAB5_DISPLAY_WIDTH;
+  return tab5_display_width();
 }
 
 int
 Display_height(void)
 {
-  return TAB5_DISPLAY_HEIGHT;
+  return tab5_display_height();
+}
+
+bool
+Display_set_rotation(int degrees)
+{
+  return ok("rotation", tab5_display_set_rotation(degrees));
+}
+
+int
+Display_rotation(void)
+{
+  return tab5_display_rotation();
 }
 
 bool

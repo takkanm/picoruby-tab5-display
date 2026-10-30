@@ -17,8 +17,13 @@ extern "C" {
  * layer stays free of, say, ESP-IDF types.
  */
 
+/* The logical screen size, which swaps with a 90 / 270 rotation. */
 int  Display_width(void);
 int  Display_height(void);
+
+/* Clockwise rotation of everything drawn from now on: 0, 90, 180, 270. */
+bool Display_set_rotation(int degrees);
+int  Display_rotation(void);
 
 /* Fill the whole screen with one RGB565 colour. */
 bool Display_fill(uint16_t rgb565);

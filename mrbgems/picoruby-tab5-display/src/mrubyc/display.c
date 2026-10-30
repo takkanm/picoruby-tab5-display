@@ -88,6 +88,41 @@ c_Display_draw(mrbc_vm *vm, mrbc_value *v, int argc)
   SET_TRUE_RETURN();
 }
 
+/*
+ * Display.rotation = 0 | 90 | 180 | 270
+ *
+ * Rotates everything drawn afterwards clockwise. width and height follow:
+ * with 90 or 270 the screen is 1280 x 720. Pixels already on screen stay.
+ */
+static void
+c_Display_rotation_eq(mrbc_vm *vm, mrbc_value *v, int argc)
+{
+  if (argc != 1) {
+    mrbc_raise(vm, MRBC_CLASS(ArgumentError), "wrong number of arguments. expected 1");
+    return;
+  }
+  if (v[1].tt != MRBC_TT_INTEGER) {
+    mrbc_raise(vm, MRBC_CLASS(TypeError), "wrong argument type. expected Integer");
+    return;
+  }
+  int degrees = GET_INT_ARG(1);
+  if (degrees != 0 && degrees != 90 && degrees != 180 && degrees != 270) {
+    mrbc_raise(vm, MRBC_CLASS(ArgumentError), "rotation must be 0, 90, 180 or 270");
+    return;
+  }
+  if (!Display_set_rotation(degrees)) {
+    mrbc_raise(vm, MRBC_CLASS(RuntimeError), "rotation failed");
+    return;
+  }
+  SET_INT_RETURN(degrees);
+}
+
+static void
+c_Display_rotation(mrbc_vm *vm, mrbc_value *v, int argc)
+{
+  SET_INT_RETURN(Display_rotation());
+}
+
 static void
 c_Display_brightness_eq(mrbc_vm *vm, mrbc_value *v, int argc)
 {
@@ -128,4 +163,6 @@ mrbc_tab5_display_init(mrbc_vm *vm)
   mrbc_define_method(vm, mrbc_class_Display, "fill", c_Display_fill);
   mrbc_define_method(vm, mrbc_class_Display, "draw", c_Display_draw);
   mrbc_define_method(vm, mrbc_class_Display, "brightness=", c_Display_brightness_eq);
+  mrbc_define_method(vm, mrbc_class_Display, "rotation=", c_Display_rotation_eq);
+  mrbc_define_method(vm, mrbc_class_Display, "rotation", c_Display_rotation);
 }
