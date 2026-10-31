@@ -1,7 +1,7 @@
 # picoruby-tab5-display
 
-Drive the M5Stack Tab5 display from PicoRuby, and read its accelerometer and
-touch panel.
+Drive the M5Stack Tab5 display from PicoRuby, read its accelerometer and
+touch panel, and set GPIO drive strength.
 
 ```ruby
 require "display"
@@ -16,19 +16,23 @@ IMU.acceleration                          #=> [x, y, z] in g
 
 require "touch"
 Touch.point                               #=> [x, y] or nil
+
+require "gpio_drive"
+GPIODrive.set(49, 0)                      # weakest drive on GPIO49
 ```
 
 The panel is portrait: **720 x 1280, RGB565**.
 
 ## What is in here
 
-Four things that have to travel together:
+Five things that have to travel together:
 
 | | |
 | --- | --- |
 | `mrbgems/picoruby-tab5-display/` | The mrbgem for the `Display` class and its VM binding |
 | `mrbgems/picoruby-tab5-imu/` | The mrbgem for the `IMU` class (the BMI270 accelerometer) |
 | `mrbgems/picoruby-tab5-touch/` | The mrbgem for the `Touch` class (the touch panel) |
+| `mrbgems/picoruby-tab5-gpio-drive/` | The mrbgem for `GPIODrive` (GPIO output drive strength) |
 | `components/tab5_display/` | The ESP-IDF component that talks to the panel, the accelerometer and the touch panel |
 
 Each gem is optional. Leave out the `conf.gem` line of one you do not need.
@@ -75,6 +79,8 @@ conf.gem File.expand_path(
   '../../../external/picoruby-tab5-display/mrbgems/picoruby-tab5-imu', __dir__)
 conf.gem File.expand_path(
   '../../../external/picoruby-tab5-display/mrbgems/picoruby-tab5-touch', __dir__)
+conf.gem File.expand_path(
+  '../../../external/picoruby-tab5-display/mrbgems/picoruby-tab5-gpio-drive', __dir__)
 ```
 
 > **Floats on the ESP32-P4.** If the build config is FemtoRuby's
@@ -193,6 +199,37 @@ generation (GT911, or ST7123 for the ST7123 / ST7121 panels).
 tap, poll it and act on the transition from touching to not touching;
 acting on the touch itself fires repeatedly while a finger rests on the
 panel.
+
+### GPIODrive
+
+| | |
+| --- | --- |
+| `GPIODrive.set(pin, strength)` | Output drive strength of an ESP32 GPIO, 0 (weakest) to 3 (strongest). The default is 2 |
+
+Nothing about this is Tab5-specific; it lives here because it needs ESP-IDF's
+GPIO driver, which only an ESP-IDF component can reach. picoruby's `GPIO`
+does not offer it.
+
+**Call it after `GPIO.new`.** picoruby's ESP32 GPIO port resets the pin with
+`gpio_reset_pin()`, which puts the drive strength back to the default.
+
+The use it was written for is lighting an LED pushed straight into two pins
+of the Tab5's side Ext.Port with no resistor: one pin driven low stands in
+for ground, and the weakest drive keeps the current down.
+
+```ruby
+require "gpio"
+require "gpio_drive"
+
+anode   = GPIO.new(49, GPIO::OUT)
+cathode = GPIO.new(50, GPIO::OUT)
+GPIODrive.set(49, 0)
+GPIODrive.set(50, 0)
+cathode.write(0)   # ground
+anode.write(1)     # on
+```
+
+A resistor in series is still the safer way to wire an LED.
 
 ### Notes
 

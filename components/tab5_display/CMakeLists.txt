@@ -22,6 +22,9 @@ idf_component_register(
     # The touch panel, likewise.
     "tab5_touch.c"
     "../../mrbgems/picoruby-tab5-touch/ports/esp32/touch.c"
+    # GPIO drive strength. Not Tab5-specific, but it needs ESP-IDF's GPIO
+    # driver, which only an ESP-IDF component can reach.
+    "../../mrbgems/picoruby-tab5-gpio-drive/ports/esp32/gpio_drive.c"
   INCLUDE_DIRS "include"
-  PRIV_REQUIRES esp_lcd esp_mm
+  PRIV_REQUIRES esp_lcd esp_mm esp_driver_gpio
 )
